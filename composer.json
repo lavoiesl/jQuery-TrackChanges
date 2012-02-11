@@ -1,0 +1,13 @@
+{
+    "name": "lavoiesl/jQuery-TrackChanges",
+    "type": "jquery-plugin",
+    "description": "TrackChanges enables to easily and unobtrusively add watches on forms and warn a user of unsaved changes on window.unload",
+    "keywords": ["jQuery"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Sébastien Lavoie",
+            "email": "github@lavoie.sl"
+        }
+    ]
+}
