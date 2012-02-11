@@ -1,0 +1,57 @@
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+  <meta charset="UTF-8">
+  <title>jQuery AutoCollapser Demo</title>
+
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script src="jQuery.trackChanges.js"></script>
+
+  <style>
+    .track-changes {
+      outline: 1px solid blue;
+    }
+    .track-changes.changed {
+      outline: 1px solid red;
+    }
+  </style>
+</head>
+<body>
+  <h1>jQuery TrackChanges Demo</h1>
+  <form action="" id="track-changes">
+    <fieldset>
+      <p>
+        <input value="Change me">
+      </p>
+      <p>
+        <select>
+          <option value="1">Value 1</option>
+          <option value="2">Value 2</option>
+          <option value="3">Value 3</option>
+        </select>
+      </p>
+      <p>
+        <textarea cols="30" rows="10">Change me</textarea>
+      </p>
+      <p><button id="revert">Revert</button></p>
+    </fieldset>
+  </form>
+  <script>
+    var tracked = $('#track-changes :input')
+      .on('trackChanges.init', function(e, data){
+        console.log(this.tagName + ' tracking activated');
+      })
+      .on('trackChanges.reverted', function(e, data){
+        console.log(this.tagName, 'has been reverted by '+data.mode);
+      })
+      .on('trackChanges.changed', function(e, data){
+        console.log(this.tagName, 'has been changed by '+data.mode+'. Original: ' + data.original);
+      })
+      .trackChanges();
+    $('#revert').click(function(e){
+      e.preventDefault();
+      tracked.trackChanges('revert');
+    });
+  </script>
+</body>
+</html>
