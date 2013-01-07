@@ -35,6 +35,7 @@
 
     unbind: function() {
       var data = this.data(plugin.name);
+      if (!data) return;
       var settings = data.settings;
       
       this
