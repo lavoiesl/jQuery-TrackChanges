@@ -4,12 +4,15 @@
   };
 
   var default_settings = {
-    trackingClass: 'track-changes',
-    changedClass: 'changed',
-    events: 'change blur'
+    trackingClass: 'track-changes', // Class added on watched fields
+    changedClass: 'changed', // Class added when field is changed
+    events: 'change blur' // Events to bind for watching changes
   };
 
   var methods = {
+    /**
+     * Initialize plugin with default options and binds data to elements
+     */
     init: function(options) {
       var settings = $.extend({}, default_settings, options);
       var data = {
@@ -23,6 +26,9 @@
       methods.trigger.call(this, 'init');
     },
 
+    /**
+     * Add classes and bind event listeners
+     */
     bind: function() {
       // In case init is called multiple times
       methods.unbind.call(this);
@@ -33,23 +39,35 @@
         .on(settings.events, methods.interaction);
     },
 
+    /**
+     * Remove classes and unbind event listeners
+     */
     unbind: function() {
       var data = this.data(plugin.name);
-      if (!data) return;
+      if (!data) return; // Already unbinded
+
       var settings = data.settings;
-      
+
       this
         .removeClass(settings.trackingClass)
         .off(settings.events, methods.changed);
     },
 
+    /**
+     * Remove all data and listeners
+     * You will need to recreate using the constructor
+     */
     destroy: function() {
       methods.unbind.call(this);
+
       this
         .removeData(plugin.name)
         .off(plugin.name);
     },
 
+    /**
+     * Manually revert
+     */
     revert: function() {
       if (methods.isChanged.call(this)) {
         methods.value.call(this, methods.original.call(this));
@@ -57,6 +75,10 @@
       }
     },
 
+    /**
+     * One of settings.events was triggered,
+     * Call reverted or changed accordingly.
+     */
     interaction: function(e) {
       var $this = $(this);
       var data = $this.data(plugin.name);
@@ -71,6 +93,10 @@
       }
     },
 
+    /**
+     * Once events have occured and change was detected,
+     * Do some bookkeeping to add class, data and trigger custom events
+     */
     changed: function(mode) {
       var data = this.data(plugin.name);
       data.changed = true;
@@ -78,6 +104,10 @@
       this.addClass(data.settings.changedClass);
     },
 
+    /**
+     * Once the field was reverted, either by API or undo,
+     * Do some bookkeeping to remove class, data and trigger custom events
+     */
     reverted: function(mode) {
       var data = this.data(plugin.name);
       data.changed = false;
@@ -85,18 +115,32 @@
       this.removeClass(data.settings.changedClass);
     },
 
+    /**
+     * Checks if value has changed
+     * @return boolean
+     */
     isChanged: function() {
       return methods.value.call(this) != methods.original.call(this);
     },
 
+    /**
+     * Custom wrapper for triggering events
+     * Mainly useful for additional functionnalities outside this plugin
+     */
     trigger: function(event, options) {
       this.trigger(plugin.name + '.' + event, options);
     },
 
+    /**
+     * Get or set the current value
+     */
     value: function(value) {
       return value === undefined ? this.val() : this.val(value);
     },
 
+    /**
+     * Get or set the original value
+     */
     original: function(value) {
       var data = this.data(plugin.name);
       if (value !== undefined) {
@@ -106,8 +150,10 @@
     }
   };
 
+  /**
+   * Standard jQuery initializer
+   */
   $.fn[plugin.name] = function(method) {
-
     var args = false;
     if ( typeof method === 'object' || ! method ) {
       // Constructor, method will hold its options
@@ -120,6 +166,7 @@
       $.error( 'Method ' +  method + ' does not exist on jQuery.' + plugin.name );
       return this;
     }
+
     return this.each(function(){
       methods[method].apply($(this), args);
     });
