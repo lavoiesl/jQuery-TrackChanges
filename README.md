@@ -1,4 +1,4 @@
-# jQuery AutoCollapser
+# jQuery TrackChanges
 
 ## Author
 Sébastien Lavoie (sebastien@lavoie.sl)
