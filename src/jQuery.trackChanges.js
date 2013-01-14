@@ -157,9 +157,9 @@
      */
     value_checked: function(value) {
       if (value !== undefined) {
-        this.get(0).checked = !!value;
+        this.prop('checked', value);
       }
-      return this.get(0).checked;
+      return this.prop('checked');
     },
 
     /**
