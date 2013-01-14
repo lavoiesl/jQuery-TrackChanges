@@ -20,4 +20,4 @@ $('.myform :input').trackChanges({
 
 ## Live demo
 Here is a live demo, please fork it to report bugs.
-http://jsfiddle.net/547cM/2/
+http://jsfiddle.net/547cM/3/
