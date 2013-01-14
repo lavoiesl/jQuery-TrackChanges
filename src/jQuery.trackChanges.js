@@ -153,13 +153,15 @@
 
     /**
      * Value function for checkable elements
-     * Return true if checked, false otherwise
+     * Encodes the value as "[01]|||value" where [01] is whether it is checked or not
      */
     value_checked: function(value) {
       if (value !== undefined) {
-        this.prop('checked', value);
+        var matches = value.match(/^([01])|||(.*)$/);
+        this.prop('checked', matches[1]);
+        this.val(matches[2]);
       }
-      return this.prop('checked');
+      return (this.prop('checked') ? 1 : 0) + '|||' + this.val();
     },
 
     /**
