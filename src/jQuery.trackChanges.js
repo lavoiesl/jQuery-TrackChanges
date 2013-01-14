@@ -14,14 +14,19 @@
      * Initialize plugin with default options and binds data to elements
      */
     init: function(options) {
-      var settings = $.extend({}, default_settings, options);
+      var settings = $.extend({
+        value: methods.detect_value_func.call(this)
+      }, default_settings, options);
+
+      // In case init is called multiple times
+      methods.unbind.call(this);
+
       var data = {
         settings: settings,
-        original: methods.value.call(this),
         changed: false
       };
-
       this.data(plugin.name, data);
+      methods.original.call(this, methods.value.call(this));
       methods.bind.call(this);
       methods.trigger.call(this, 'init');
     },
@@ -30,9 +35,6 @@
      * Add classes and bind event listeners
      */
     bind: function() {
-      // In case init is called multiple times
-      methods.unbind.call(this);
-
       var settings = this.data(plugin.name).settings;
       this
         .addClass(settings.trackingClass)
@@ -50,7 +52,8 @@
 
       this
         .removeClass(settings.trackingClass)
-        .off(settings.events, methods.changed);
+        .removeClass(settings.changedClass)
+        .off(settings.events, methods.interaction);
     },
 
     /**
@@ -90,6 +93,12 @@
         }
       } else if (wasChanged) {
         methods.reverted.call($this, 'interaction');
+      }
+
+      if (e !== undefined && $this.is(':radio') && $this.get(0).name) {
+        // Call interaction on the radio buttons of the same group
+        // e !== undefined is to ensure the call is not recursive
+        $(':radio[name="' + $this.get(0).name + '"]').trackChanges('interaction');
       }
     },
 
@@ -135,7 +144,30 @@
      * Get or set the current value
      */
     value: function(value) {
+      return this.data(plugin.name).settings.value.call(this, value);
+    },
+
+    value_default: function(value) {
       return value === undefined ? this.val() : this.val(value);
+    },
+
+    /**
+     * Value function for checkable elements
+     * Return true if checked, false otherwise
+     */
+    value_checked: function(value) {
+      if (value !== undefined) {
+        this.get(0).checked = !!value;
+      }
+      return this.get(0).checked;
+    },
+
+    /**
+     * Detects which value function is best for element type
+     * May be overridden by value option in initializer
+     */
+    detect_value_func: function() {
+      return this.is(':checkbox,:radio') ? methods.value_checked : methods.value_default;
     },
 
     /**
@@ -154,7 +186,9 @@
    * Standard jQuery initializer
    */
   $.fn[plugin.name] = function(method) {
+    var ret = $(this);
     var args = false;
+
     if ( typeof method === 'object' || ! method ) {
       // Constructor, method will hold its options
       args = [method];
@@ -167,8 +201,14 @@
       return this;
     }
 
-    return this.each(function(){
-      methods[method].apply($(this), args);
+    this.each(function(){
+      var r = methods[method].apply($(this), args);
+      // value was returned, pop to higher scope.
+      if (r !== undefined) {
+        ret = r;
+      }
     });
+
+    return ret;
   };
 })(jQuery);

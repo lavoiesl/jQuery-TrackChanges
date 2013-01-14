@@ -2,26 +2,30 @@
 <html lang="en-US">
 <head>
   <meta charset="UTF-8">
-  <title>jQuery AutoCollapser Demo</title>
+  <title>jQuery TrackChanges Demo</title>
 
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
   <script src="src/jQuery.trackChanges.js"></script>
 
   <style>
     .track-changes {
-      outline: 1px solid blue;
+      outline: 2px solid blue;
     }
     .track-changes.changed {
-      outline: 1px solid red;
+      outline: 2px solid red;
     }
   </style>
 </head>
 <body>
   <h1>jQuery TrackChanges Demo</h1>
+
   <form action="" id="track-changes">
     <fieldset>
       <p>
-        <input value="Change me">
+        <input value="Change me" />
+      </p>
+      <p>
+        <input type="number" value="1" />
       </p>
       <p>
         <select>
@@ -31,26 +35,74 @@
         </select>
       </p>
       <p>
+        <label>
+          <input type="radio" name="test" value="1">
+          1
+        </label>
+        <label>
+          <input type="radio" name="test" checked value="2">
+          2
+        </label>
+        <label>
+          <input type="radio" name="test" value="3">
+          3
+        </label>
+      </p>
+      <p>
+        <label>
+          <input type="checkbox" name="test" value="1">
+          1
+        </label>
+        <label>
+          <input type="checkbox" name="test" checked value="2">
+          2
+        </label>
+      </p>
+      <p>
         <textarea cols="30" rows="10">Change me</textarea>
       </p>
-      <p><button id="revert">Revert</button></p>
+      <p>
+        <button data-action="init" class="action">Init</button>
+        <button data-action="revert" class="action">Revert</button>
+        <button data-action="destroy" class="action">Destroy</button>
+      </p>
     </fieldset>
   </form>
+  <pre id="log"></pre>
   <script>
-    var tracked = $('#track-changes :input')
-      .on('trackChanges.init', function(e, data){
-        console.log(this.tagName + ' tracking activated');
-      })
-      .on('trackChanges.reverted', function(e, data){
-        console.log(this.tagName, 'has been reverted by '+data.mode);
-      })
-      .on('trackChanges.changed', function(e, data){
-        console.log(this.tagName, 'has been changed by '+data.mode+'. Original: ' + data.original);
-      })
-      .trackChanges();
-    $('#revert').click(function(e){
+    var tracked = $('#track-changes :input');
+
+    var log_element = $('#log');
+    function log(text){
+      log_element.append(text + "\n");
+    }
+
+    tracked.on('trackChanges.init', function (e, data) {
+      log(this.tagName + ' tracking activated');
+    });
+    tracked.on('trackChanges.reverted', function (e, data) {
+      log(this.tagName + ' has been reverted by ' + data.mode);
+    })
+    tracked.on('trackChanges.changed', function (e, data) {
+      log(this.tagName + ' has been changed to "' + $(this).trackChanges('value') + '" by ' + data.mode + '. Original: "' + data.original + '"');
+    });
+
+    $('.action').click(function(e) {
       e.preventDefault();
-      tracked.trackChanges('revert');
+
+      switch ($(this).data('action')) {
+        case 'revert':
+          tracked.trackChanges('revert');
+          break;
+        case 'destroy':
+          tracked.trackChanges('destroy');
+          break;
+        case 'init':
+          tracked.trackChanges({
+            events: 'blur keyup change'
+          });
+          break;
+      }
     });
   </script>
 </body>
